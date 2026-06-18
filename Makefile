@@ -12,8 +12,8 @@ clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 lint:
-	flake8 .
-	mypy . \
+	uv run flake8 .
+	uv run mypy . \
 	--warn-return-any \
 	--warn-unused-ignores \
 	--ignore-missing-imports \
@@ -21,5 +21,5 @@ lint:
 	--check-untyped-defs
 
 lint-strict:
-	flake8 .
-	mypy . --strict
+	uv run flake8 .
+	uv run mypy . --strict
