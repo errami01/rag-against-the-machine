@@ -1,38 +1,25 @@
 # RAG against the machine - Makefile
-.PHONY: install run debug clean lint lint-strict test
-
-PYTHON := uv run python
-MYPY_FLAGS := --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
-
 install:
-	@echo "Installing project dependencies using UV..."
-	uv pip install -e .
+	uv sync
 
 run:
-	@echo "Running primary package command..."
-	$(PYTHON) -m student --help
+	uv run python -m student
 
 debug:
-	@echo "Launching main command in debug mode with built-in pdb..."
-	$(PYTHON) -m pdb -m student search "How to configure OpenAI server?" --k 5
+	uv run python -m pdb -m student
 
 clean:
-	@echo "Removing temporary files and translation artifacts..."
-	rm -rf .mypy_cache .pytest_cache .benchmarks htmlcov .coverage
-	find . -type d -name "__pycache__" -exec rm -r {} +
-	find . -type f -name "*.pyc" -delete
+	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 lint:
-	@echo "Running standard flake8 style analysis..."
-	uv run flake8 student/ tests/
-	@echo "Evaluating strict type correctness with mypy..."
-	uv run mypy student/ $(MYPY_FLAGS)
+	flake8 .
+	mypy . \
+	--warn-return-any \
+	--warn-unused-ignores \
+	--ignore-missing-imports \
+	--disallow-untyped-defs \
+	--check-untyped-defs
 
 lint-strict:
-	@echo "Running aggressive style checking..."
-	uv run flake8 student/ tests/
-	uv run mypy student/ --strict
-
-test:
-	@echo "Running edge-case test profiles..."
-	uv run pytest tests/ -v
+	flake8 .
+	mypy . --strict
