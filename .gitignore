@@ -70,7 +70,6 @@ coverage.xml
 Thumbs.db
 
 # Project manager / local tool files
-uv.lock
 uv.lock.json
 uv.env
 
