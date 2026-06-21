@@ -62,8 +62,16 @@ class PythonChunker:
                     start_char,
                 )
             )
-
+        if not chunks:
+            chunks.extend(
+                self._split_large_chunk(
+                    path,
+                    text,
+                    0,
+                )
+            )
         return chunks
+
     def _split_large_chunk(
         self,
         path: Path,

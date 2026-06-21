@@ -20,25 +20,21 @@ class MarkdownChunker:
         path: Path,
     ) -> list[Chunk]:
 
-        text = path.read_text(
-            encoding="utf-8",
-            errors="ignore",
-        )
-
+        text = path.read_text(encoding="utf-8", errors="ignore")
         matches = list(
             HEADER_PATTERN.finditer(text)
         )
 
         if not matches:
-            return self._window_chunk(
+            return self._create_chunks(
                 path,
                 text,
+                0
             )
 
         chunks: list[Chunk] = []
 
         for i, match in enumerate(matches):
-
             start = match.start()
 
             if i + 1 < len(matches):
