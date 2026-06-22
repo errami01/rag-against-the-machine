@@ -5,16 +5,16 @@ from tqdm import tqdm
 from student.ingestion.chunker import Chunker
 from student.ingestion.loader import discover_files
 from student.utils.json import save_json
+from student.retrieval.bm25_index import BM25Indexer
 
 
 class Indexer:
 
     def index(
         self,
-        repo_path: str,
         max_chunk_size: int = 2000,
     ) -> None:
-
+        repo_path = "data/raw/vllm-0.10.1"
         files = discover_files(
             Path(repo_path)
         )
@@ -45,6 +45,11 @@ class Indexer:
                 chunk.model_dump()
                 for chunk in chunks
             ],
+        )
+
+        BM25Indexer().build(
+            chunks,
+            "data/processed/bm25/index",
         )
 
         print(
