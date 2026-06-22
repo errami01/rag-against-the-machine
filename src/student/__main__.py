@@ -17,10 +17,7 @@ class CLI:
 
         print(chunk.model_dump_json(indent=2))
 
-    def index(
-        self,
-        max_chunk_size,
-    ) -> None:
+    def index(self, max_chunk_size) -> None:
 
         Indexer().index(
             max_chunk_size,

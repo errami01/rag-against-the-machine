@@ -1,9 +1,13 @@
 from pydantic import BaseModel
+from typing import List
+from student.models.source import MinimalSource
 
-from student.models.source import Source
 
-
-class SearchResult(BaseModel):
+class MinimalSearchResults(BaseModel):
     question_id: str
+    question: str
+    retrieved_sources: List[MinimalSource]
 
-    retrieved_sources: list[Source]
+
+class MinimalAnswer(MinimalSearchResults):
+    answer: str

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class Source(BaseModel):
+class MinimalSource(BaseModel):
     file_path: str
 
     first_character_index: int
