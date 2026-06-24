@@ -2,7 +2,7 @@ import fire
 from student.ingestion.indexer import (Indexer)
 from student.models import Chunk
 from student.retrieval.search import (SearchEngine)
-
+from student.retrieval.search_dataset import DatasetSearcher
 
 class CLI:
     def test_model(self) -> None:
@@ -18,23 +18,15 @@ class CLI:
         print(chunk.model_dump_json(indent=2))
 
     def index(self, max_chunk_size) -> None:
+        Indexer().index(max_chunk_size)
 
-        Indexer().index(
-            max_chunk_size,
-        )
     def search(self, query: str, k: int = 1) -> None:
 
         engine = SearchEngine()
 
-        results = engine.search(
-            query,
-            k,
-        )
+        results = engine.search(query,k)
 
-        for i, chunk in enumerate(
-            results,
-            start=1,
-        ):
+        for i, chunk in enumerate(results, start=1):
             print()
             print(f"Rank {i}")
             print(
@@ -46,8 +38,19 @@ class CLI:
                 f"-"
                 f"{chunk.last_character_index}"
             )
-            print(chunk.text[:500])
+            # print(chunk.text[:500])
 
+    def search_dataset(
+        self,
+        dataset_path: str,
+        save_path: str,
+        k: int = 10,
+    ) -> None:
+        DatasetSearcher().run(
+            dataset_path=dataset_path,
+            save_path=save_path,
+            k=k,
+        )
     def stats(self) -> None:
         from student.utils.json import load_json
 
