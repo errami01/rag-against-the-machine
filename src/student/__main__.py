@@ -3,6 +3,7 @@ from student.ingestion.indexer import (Indexer)
 from student.models import Chunk
 from student.retrieval.search import (SearchEngine)
 from student.retrieval.search_dataset import DatasetSearcher
+from student.generation.answer import AnswerService
 
 class CLI:
     def test_model(self) -> None:
@@ -59,5 +60,9 @@ class CLI:
         )
 
         print(f"Chunks: {len(chunks)}")
+    def answer(self,question: str,k: int = 5) -> None:
+        response = AnswerService().answer(question,k=k)
+        print(response)
+
 if __name__ == "__main__":
     fire.Fire(CLI)
