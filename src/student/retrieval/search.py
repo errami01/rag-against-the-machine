@@ -17,11 +17,7 @@ class SearchEngine:
             for chunk in raw_chunks
         ]
 
-    def search(
-        self,
-        query: str,
-        k: int = 5,
-    ) -> list[Chunk]:
+    def search(self, query: str, k: int = 5) -> list[Chunk]:
         
         cached_result = self.cache.get(query, k)
         if cached_result is not None:
