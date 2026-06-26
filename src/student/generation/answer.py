@@ -1,6 +1,7 @@
 from student.generation.prompts import ANSWER_PROMPT
 from student.generation.qwen import QwenModel
 from student.retrieval.search import SearchEngine
+from functools import lru_cache
 
 def build_context(chunks, max_chars: int = 8000) -> str:
 
@@ -24,12 +25,21 @@ def build_context(chunks, max_chars: int = 8000) -> str:
 
     return "\n\n".join(context_parts)
 
+
 class AnswerService:
 
     def __init__(self) -> None:
         self.search_engine = (SearchEngine())
 
         self.llm = QwenModel()
+
+    @lru_cache(maxsize=1024)
+    def build_prompt(self, question: str, context: str) -> str:
+
+        return ANSWER_PROMPT.format(
+            context=context,
+            question=question,
+        )
     
     def answer(self, question: str, k: int = 5) -> str:
 
@@ -37,6 +47,6 @@ class AnswerService:
 
         context = build_context(chunks)
 
-        prompt = ANSWER_PROMPT.format(context=context, question=question)
+        prompt = self.build_prompt(question, context)
 
         return self.llm.generate(prompt)

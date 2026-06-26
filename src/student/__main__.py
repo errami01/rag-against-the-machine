@@ -52,6 +52,7 @@ class CLI:
             save_path=save_path,
             k=k,
         )
+
     def stats(self) -> None:
         from student.utils.json import load_json
 
@@ -60,6 +61,7 @@ class CLI:
         )
 
         print(f"Chunks: {len(chunks)}")
+
     def answer(self,question: str,k: int = 5) -> None:
         response = AnswerService().answer(question,k=k)
         print(response)
