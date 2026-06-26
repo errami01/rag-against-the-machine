@@ -27,7 +27,7 @@ class SearchEngine:
         if cached_result is not None:
             return cached_result
 
-        query_tokens = tokenize(query)
+        query_tokens = list(tokenize(query))
 
         results, scores = (
             self.retriever.retrieve(
