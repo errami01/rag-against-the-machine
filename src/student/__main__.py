@@ -4,6 +4,9 @@ from student.models import Chunk
 from student.retrieval.search import (SearchEngine)
 from student.retrieval.search_dataset import DatasetSearcher
 from student.generation.answer import AnswerService
+from student.generation.answer_dataset import DatasetAnswerer
+import time
+
 
 class CLI:
     def test_model(self) -> None:
@@ -66,5 +69,24 @@ class CLI:
         response = AnswerService().answer(question,k=k)
         print(response)
 
+    def answer_dataset(
+        self,
+        search_results_path: str,
+        save_path: str,
+    ) -> None:
+
+        DatasetAnswerer().run(
+            search_results_path,
+            save_path,
+        )
+
 if __name__ == "__main__":
+    # 1. Start the timer
+    start_time = time.perf_counter()
     fire.Fire(CLI)
+    # 2. Stop the timer
+    end_time = time.perf_counter()
+
+    # 3. Calculate execution time
+    execution_time = end_time - start_time
+    print(f"Execution time: {execution_time:.6f} seconds")

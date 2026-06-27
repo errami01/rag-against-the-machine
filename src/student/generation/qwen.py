@@ -53,3 +53,11 @@ class QwenModel:
             generated,
             skip_special_tokens=True,
         ).strip()
+    
+    @classmethod
+    def get_instance(cls) -> "QwenModel":
+
+        if cls._instance is None:
+            cls._instance = cls()
+
+        return cls._instance

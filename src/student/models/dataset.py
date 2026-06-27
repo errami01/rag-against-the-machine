@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, Field
 
 
@@ -18,10 +20,16 @@ class RagDataset(BaseModel):
 
 class MinimalSearchResults(BaseModel):
     question_id: str
-    question_str: str = Field(..., alias="question")
+    question: str 
     retrieved_sources: list[MinimalSource]
 
 
 class StudentSearchResults(BaseModel):
     search_results: list[MinimalSearchResults]
     k: int
+
+class MinimalAnswer(MinimalSearchResults):
+    answer: str
+
+class StudentSearchResultsAndAnswer(StudentSearchResults):
+    search_results: List[MinimalAnswer]

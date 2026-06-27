@@ -26,6 +26,13 @@ def build_context(chunks, max_chars: int = 8000) -> str:
     return "\n\n".join(context_parts)
 
 
+@lru_cache(maxsize=1024)
+def build_prompt(question: str, context: str) -> str:
+
+    return ANSWER_PROMPT.format(
+        context=context,
+        question=question,
+    )
 class AnswerService:
 
     def __init__(self) -> None:
@@ -33,13 +40,6 @@ class AnswerService:
 
         self.llm = QwenModel()
 
-    @lru_cache(maxsize=1024)
-    def build_prompt(self, question: str, context: str) -> str:
-
-        return ANSWER_PROMPT.format(
-            context=context,
-            question=question,
-        )
     
     def answer(self, question: str, k: int = 5) -> str:
 
@@ -47,6 +47,6 @@ class AnswerService:
 
         context = build_context(chunks)
 
-        prompt = self.build_prompt(question, context)
+        prompt = build_prompt(question, context)
 
         return self.llm.generate(prompt)
