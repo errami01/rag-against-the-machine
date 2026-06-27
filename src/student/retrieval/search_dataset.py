@@ -47,7 +47,10 @@ class DatasetSearcher:
                 )
             )
 
-        output = StudentSearchResults(search_results=results, k=k)
+        output = StudentSearchResults(
+            search_results=results,
+            k=k,
+        )
 
         save_path = Path(save_path)
 
@@ -56,6 +59,11 @@ class DatasetSearcher:
             exist_ok=True,
         )
 
-        save_json(save_path, output.model_dump())
+        save_json(
+            save_path,
+            output.model_dump(),
+        )
 
-        print(f"Saved {len(results)} results to {save_path}")
+        print(
+            f"Saved {len(results)} results to {save_path}"
+        )
