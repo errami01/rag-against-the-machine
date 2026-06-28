@@ -13,6 +13,7 @@ Context:
 
 Question:
 {question}
-
+Provide one answer in one paragraph.
+stop after new line character.
 Answer:
 """.strip()

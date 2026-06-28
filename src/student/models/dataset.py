@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class MinimalSource(BaseModel):
@@ -10,17 +10,23 @@ class MinimalSource(BaseModel):
 
 
 class UnansweredQuestion(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     question_id: str
-    question: str
+    question: str = Field(..., alias="question_str")
 
+
+class AnsweredQuestion(UnansweredQuestion):
+    sources: List[MinimalSource]
+    answer: str
 
 class RagDataset(BaseModel):
-    rag_questions: list[UnansweredQuestion]
+    rag_questions: list[UnansweredQuestion | AnsweredQuestion]
 
 
 class MinimalSearchResults(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     question_id: str
-    question: str 
+    question: str = Field(..., alias="question_str")
     retrieved_sources: list[MinimalSource]
 
 

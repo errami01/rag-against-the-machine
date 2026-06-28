@@ -48,5 +48,6 @@ class AnswerService:
         context = build_context(chunks)
 
         prompt = build_prompt(question, context)
-
+        print(f"Prompt: {prompt}")
+        print("End of prompt")
         return self.llm.generate(prompt)

@@ -61,7 +61,7 @@ class DatasetSearcher:
 
         save_json(
             save_path,
-            output.model_dump(),
+            output.model_dump(by_alias=True),
         )
 
         print(

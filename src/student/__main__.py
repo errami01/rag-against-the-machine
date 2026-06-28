@@ -5,6 +5,7 @@ from student.retrieval.search import (SearchEngine)
 from student.retrieval.search_dataset import DatasetSearcher
 from student.generation.answer import AnswerService
 from student.generation.answer_dataset import DatasetAnswerer
+from student.evaluation.evaluator import Evaluator
 import time
 
 
@@ -80,6 +81,18 @@ class CLI:
             save_path,
         )
 
+    def evaluate(
+        self,
+        student_answer_path: str,
+        dataset_path: str,
+        k: int = 10,
+    ) -> None:
+
+        Evaluator().evaluate(
+            student_answer_path,
+            dataset_path,
+            k,
+        )
 if __name__ == "__main__":
     # 1. Start the timer
     start_time = time.perf_counter()
