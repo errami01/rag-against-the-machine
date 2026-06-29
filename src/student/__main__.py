@@ -28,8 +28,11 @@ class CLI:
     def search(self, query: str, k: int = 1) -> None:
 
         engine = SearchEngine()
-
-        results = engine.search(query,k)
+        try:
+            results = engine.search(query,k)
+        except Exception as e:
+            print(f"Error occurred while searching: {e}")
+            return
 
         for i, chunk in enumerate(results, start=1):
             print()

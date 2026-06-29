@@ -5,7 +5,7 @@ class Chunk(BaseModel):
     chunk_id: str
 
     file_path: str
-    file_type: str
+    file_type: str = "markdown"
 
     text: str
 

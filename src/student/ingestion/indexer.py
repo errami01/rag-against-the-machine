@@ -24,16 +24,13 @@ class Indexer:
         )
 
         chunks = []
-
         for file in tqdm(files):
-
             try:
                 chunks.extend(
                     chunker.chunk_file(
                         file
                     )
                 )
-
             except Exception as exc:
                 print(
                     f"Failed: {file}: {exc}"

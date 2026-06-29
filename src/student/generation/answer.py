@@ -3,7 +3,7 @@ from student.generation.qwen import QwenModel
 from student.retrieval.search import SearchEngine
 from functools import lru_cache
 
-def build_context(chunks, max_chars: int = 8000) -> str:
+def build_context(chunks, max_chars: int = 4000) -> str:
 
     context_parts = []
 
@@ -48,6 +48,9 @@ class AnswerService:
         context = build_context(chunks)
 
         prompt = build_prompt(question, context)
-        print(f"Prompt: {prompt}")
-        print("End of prompt")
-        return self.llm.generate(prompt)
+        try:
+            response = self.llm.generate(prompt)
+        except Exception as e:
+            print(f"[LLM ERROR] {e}")
+            response = "Error generating answer"        
+        return response
