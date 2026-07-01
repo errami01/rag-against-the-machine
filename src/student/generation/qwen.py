@@ -31,11 +31,29 @@ class QwenModel:
     def generate(
         self,
         prompt: str,
-        max_new_tokens: int = 50,
+        max_new_tokens: int = 300,
     ) -> str:
-
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert assistant for the vLLM project."
+                    "Answer only using the provided context."
+                ),
+            },
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ]
+        text = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=False
+        )
         inputs = self.tokenizer(
-            prompt,
+            text,
             return_tensors="pt",
         ).to(self.model.device)
 
@@ -43,7 +61,15 @@ class QwenModel:
             **inputs,
             max_new_tokens=max_new_tokens,
             do_sample=False,
+            temperature=None,
+            eos_token_id=self.tokenizer.eos_token_id,
+            pad_token_id=self.tokenizer.eos_token_id,
         )
+        # outputs = self.model.generate(
+        #     **inputs,
+        #     max_new_tokens=max_new_tokens,
+        #     do_sample=False,
+        # )
 
         generated = outputs[0][inputs["input_ids"].shape[1]:]
 

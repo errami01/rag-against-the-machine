@@ -99,7 +99,10 @@ class CLI:
 if __name__ == "__main__":
     # 1. Start the timer
     start_time = time.perf_counter()
-    fire.Fire(CLI)
+    try:
+        fire.Fire(CLI)
+    except Exception as e:
+        print(f"[CLI ERROR] {e}")
     # 2. Stop the timer
     end_time = time.perf_counter()
 

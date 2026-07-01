@@ -51,4 +51,5 @@ class Indexer:
 
         print(
             f"Created {len(chunks)} chunks"
+            f"\nIngestion complete! Indices saved under data/processed/"
         )
