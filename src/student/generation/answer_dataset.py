@@ -4,7 +4,7 @@ from student.generation.answer import (
     build_prompt,
     build_context,
 )
-from student.generation.qwen import QwenModel
+from student.generation.factory import BackendFactory 
 from student.models.dataset import (
     MinimalAnswer,
     StudentSearchResults,
@@ -21,6 +21,7 @@ class DatasetAnswerer:
         self,
         search_results_path: str,
         save_path: str,
+        backend: str = "transformers",
     ) -> None:
 
         results = load_search_results(
@@ -29,7 +30,7 @@ class DatasetAnswerer:
 
         lookup = ChunkLookup()
 
-        llm = QwenModel.get_instance()
+        llm = BackendFactory.create(backend)
 
         answers = []
         for result in tqdm(

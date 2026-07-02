@@ -69,14 +69,15 @@ class CLI:
 
         print(f"Chunks: {len(chunks)}")
 
-    def answer(self,question: str,k: int = 5) -> None:
-        response = AnswerService().answer(question,k=k)
+    def answer(self,question: str,k: int = 5, backend: str = "transformers") -> None:
+        response = AnswerService(backend=backend).answer(question,k=k)
         print(response)
 
     def answer_dataset(
         self,
         search_results_path: str,
         save_path: str,
+        backend: str = "transformers",
     ) -> None:
 
         DatasetAnswerer().run(

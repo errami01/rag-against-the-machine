@@ -1,5 +1,5 @@
 from student.generation.prompts import ANSWER_PROMPT
-from student.generation.qwen import QwenModel
+from student.generation.factory import BackendFactory 
 from student.retrieval.search import SearchEngine
 from functools import lru_cache
 
@@ -35,11 +35,16 @@ def build_prompt(question: str, context: str) -> str:
     )
 class AnswerService:
 
-    def __init__(self) -> None:
-        self.search_engine = (SearchEngine())
+    def __init__(
+        self,
+        backend: str = "transformers",
+    ) -> None:
 
-        self.llm = QwenModel()
+        self.search_engine = SearchEngine()
 
+        self.llm = BackendFactory.create(
+            backend
+        )
     
     def answer(self, question: str, k: int = 5) -> str:
 

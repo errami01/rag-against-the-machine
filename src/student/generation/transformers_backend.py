@@ -1,10 +1,9 @@
 from transformers import (AutoModelForCausalLM,AutoTokenizer)
 import torch
-
+from student.generation.backend import LLMBackend
 
 MODEL_NAME = "Qwen/Qwen3-0.6B"
-class QwenModel:
-
+class TransformersBackend(LLMBackend):
     _instance = None
 
     def __new__(cls):
