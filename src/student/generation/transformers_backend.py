@@ -37,7 +37,7 @@ class TransformersBackend(LLMBackend):
                 "role": "system",
                 "content": (
                     "You are an expert assistant for the vLLM project."
-                    "Answer only using the provided context."
+                    "Answer from the context."
                 ),
             },
             {

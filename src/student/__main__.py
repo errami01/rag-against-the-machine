@@ -7,20 +7,18 @@ from student.generation.answer import AnswerService
 from student.generation.answer_dataset import DatasetAnswerer
 from student.evaluation.evaluator import Evaluator
 import time
+import json
 
 
 class CLI:
     def test_model(self) -> None:
-        chunk = Chunk(
-            chunk_id="1",
-            file_path="example.py",
-            file_type="python",
-            text="print('hello')",
-            first_character_index=0,
-            last_character_index=14,
-        )
-
-        print(chunk.model_dump_json(indent=2))
+        extensions = []
+        with open("data/datasets/AnsweredQuestions/dataset_code_public.json", "r") as f:
+            data = json.load(f)
+        for question in data["rag_questions"]:
+            for source in question["sources"]:
+                extensions.append(source["file_path"].split(".")[-1])
+        print(set(extensions))
 
     def index(self, max_chunk_size) -> None:
         Indexer().index(max_chunk_size)
