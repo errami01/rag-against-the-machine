@@ -13,13 +13,38 @@ from student.utils.json import save_json
 
 
 class DatasetSearcher:
+    """An automated evaluation processor for running batch searches over
+    a RAG dataset.
+
+    This class loads a specified evaluation dataset, processes each
+    question through a search engine pipeline to retrieve relevant
+    text chunks, map their precise source character boundaries, and
+    exports the final aggregated results to a JSON file.
+    """
+
     def run(
         self,
         dataset_path: str,
         save_path: str,
         k: int = 10,
     ) -> None:
+        """Executes the batch search pipeline across all questions in the
+        dataset.
 
+        Iterates through the dataset questions, extracts the top-K relevant
+        text chunks using a vector search engine, maps those chunks to
+        metadata-rich sources, and saves the output configuration to disk.
+
+        Args:
+            dataset_path: The filesystem path or identifier of the dataset to
+            load. save_path: The target filesystem path where the JSON results
+            should be written.
+            k: The maximum number of relevant documents or chunks to retrieve
+            per question. Defaults to 10.
+
+        Raises:
+            OSError: If creating directories or writing the save file fails.
+        """
         dataset = load_dataset(dataset_path)
 
         engine = SearchEngine()

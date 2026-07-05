@@ -5,7 +5,6 @@ from pathlib import Path
 from student.models import Chunk
 
 
-
 HEADER_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 PARAGRAPH_PATTERN = re.compile(r"\n\s*\n")
 SENTENCE_PATTERN = re.compile(r"(?<=[.!?])\s+")
@@ -34,6 +33,16 @@ class MarkdownChunker:
         max_chunk_size: int = 2000,
         overlap: int = 400,
     ):
+        """Initialize the hierarchical text chunker.
+
+        Args:
+            max_chunk_size: The maximum allowed character length for
+              any unified chunk, including injected metadata headers.
+              Defaults to 2000.
+            overlap: The character window fallback constraint used when
+              performing hard character-level cuts across oversized
+              fragments. Defaults to 400.
+        """
         self.max_chunk_size = max_chunk_size
         self.overlap = overlap
 
@@ -46,7 +55,20 @@ class MarkdownChunker:
             encoding="utf-8",
             errors="ignore",
         )
+        """Parse a document file hierarchically based on structural headings.
 
+        Tracks Markdown header boundaries to isolate distinct nested
+        contexts. It dynamically maps parent-child heading relationships
+        up to level 6 and splits text sections into metadata-annotated
+        chunks. If a file contains no headers, it treats the entire text
+        content as a single raw section block.
+
+        Args:
+            path: The pathlib.Path pointing to the document file on disk.
+
+        Returns:
+            A list of structural Chunk objects containing context text.
+        """
         matches = list(HEADER_PATTERN.finditer(text))
 
         if not matches:
@@ -116,6 +138,17 @@ class MarkdownChunker:
     #########################################################
 
     def _metadata(self, path: Path, context: list[str]) -> str:
+        """Format the context hierarchy into a metadata prefix string.
+
+        Args:
+            path: The source file Path context.
+            context: An ordered list of ancestor heading names leading
+              down to the current active text scope.
+
+        Returns:
+            A string containing formatted key-value labels if context
+            exists; otherwise an empty string.
+        """
         if not context:
             return ""
 
@@ -125,6 +158,16 @@ class MarkdownChunker:
         )
 
     def _fits(self, body: str, metadata: str) -> bool:
+        """Verify if the total length of a segment respects size constraints.
+
+        Args:
+            body: The text content under validation.
+            metadata: The metadata prefix sequence to attach.
+
+        Returns:
+            True if the combined character footprint is equal to or less
+            than the maximum size threshold; otherwise False.
+        """
         return len(metadata) + len(body) <= self.max_chunk_size
 
     #########################################################
@@ -138,7 +181,23 @@ class MarkdownChunker:
         offset: int,
         context: list[str],
     ) -> list[Chunk]:
+        """Process an isolated heading section down into paragraph blocks.
 
+        If the entire section along with its metadata prefix fits within
+        the configured character budget, it generates a single chunk.
+        Otherwise, it splits the text by paragraph boundaries and merges
+        paragraphs sequentially up to the size limit.
+
+        Args:
+            path: The source file Path context.
+            section: The raw text snippet captured inside the context.
+            offset: The global starting character position of this
+              section within the root file.
+            context: Ancestor headings sequence tracking document depth.
+
+        Returns:
+            A list of parsed structural Chunk objects.
+        """
         metadata = self._metadata(path, context)
 
         if self._fits(section, metadata):
@@ -227,10 +286,6 @@ class MarkdownChunker:
 
         return chunks
 
-    #########################################################
-    # Large paragraph
-    #########################################################
-
     def _split_large_paragraph(
         self,
         path: Path,
@@ -238,7 +293,20 @@ class MarkdownChunker:
         offset: int,
         metadata: str,
     ) -> list[Chunk]:
+        """Partition an oversized paragraph block using sentence boundaries.
 
+        Aggregates sentences sequentially while keeping combined text and
+        metadata under the configured character ceiling.
+
+        Args:
+            path: The source file Path context.
+            paragraph: The text block that breached chunk limits.
+            offset: The absolute index position tracking paragraph start.
+            metadata: Pre-formatted file and section tracking headers.
+
+        Returns:
+            A list of granular, sentence-aggregated Chunk entries.
+        """
         sentences = SENTENCE_PATTERN.split(paragraph)
 
         chunks = []
@@ -354,10 +422,6 @@ class MarkdownChunker:
             )
 
         return chunks
-
-    #########################################################
-    # Chunk creation
-    #########################################################
 
     def _make_chunk(
         self,

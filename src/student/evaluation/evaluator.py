@@ -6,6 +6,11 @@ from student.evaluation.recall import recall_at_k
 
 
 class Evaluator:
+    """An evaluation engine for calculating RAG retrieval quality metrics.
+
+    This engine parses student search submissions, aligns them against a
+    ground-truth dataset, and computes statistical accuracy measurements.
+    """
 
     def evaluate(
         self,
@@ -13,7 +18,23 @@ class Evaluator:
         dataset_path: str,
         k: int = 10,
     ) -> None:
+        """Evaluate student search footprints against the reference dataset.
 
+        Loads the student and ground-truth manifests, extracts question-level
+        source intersections, and computes the average Recall@K metrics at
+        predefined cutoff windows before displaying results to the console.
+
+        Args:
+            student_path: The file path to the student search results JSON.
+            dataset_path: The file path to the gold-standard dataset JSON.
+            k: The absolute maximum retrieval evaluation depth limit.
+              Defaults to 10.
+
+        Raises:
+            OSError: If reading either file path from disk fails.
+            ValidationError: If JSON contents do not comply with the
+              expected target Pydantic schemas.
+        """
         dataset = load_dataset(dataset_path)
 
         student = StudentSearchResults.model_validate(

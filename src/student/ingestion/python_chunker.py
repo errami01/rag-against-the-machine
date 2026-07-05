@@ -6,12 +6,49 @@ from student.models import Chunk
 
 
 class PythonChunker:
+    """A code-aware text chunking pipeline tailored for Python files.
+
+    This class parses Python source code into its constituent Abstract
+    Syntax Tree (AST) nodes to create contextually coherent text chunks.
+    Instead of arbitrarily cutting source code across logical boundaries,
+    it isolates top-level functions, classes, and internal methods. It
+    attaches dynamic comment-based scope headers to each chunk, ensuring
+    that large language models and embedding engines retain the file name
+    and hierarchical relationships during the retrieval stage.
+    """
+
     def __init__(self, max_chunk_size: int = 2000) -> None:
+        """Initialize the Python chunker with a specific character limit.
+
+        Args:
+            max_chunk_size: The strict upper limit for characters
+              contained within an individual chunk. Defaults to 2000.
+        """
         self.max_chunk_size = max_chunk_size
 
     def chunk_file(self, path: Path) -> list[Chunk]:
+        """Parse a Python source file into structurally isolated chunks.
+
+        Reads the raw code and attempts an AST analysis. If a script
+        possesses invalid syntax, it falls back gracefully to a standard
+        sliding-window text split. For valid files, it flushes out
+        structural boundaries in two distinct stages:
+
+        1. Captures global module initialization blocks (imports,
+           configuration statements).
+        2. Traverses child nodes to extract standalone functions, class
+           definitions, and internal class methods while automatically
+           injecting relative context strings.
+
+        Args:
+            path: The pathlib.Path pointing to the python file on disk.
+
+        Returns:
+            A list of verified Chunk objects containing scope-annotated
+            source snippets.
+        """
         text = path.read_text(encoding="utf-8", errors="ignore")
-        
+
         try:
             tree = ast.parse(text)
         except SyntaxError:
@@ -26,8 +63,13 @@ class PythonChunker:
 
         # 1. Capture Global Module Context (Imports, Globals)
         global_end_line = min(35, len(line_starts) - 1)
-        global_end_char = min(line_starts[global_end_line], self.max_chunk_size)
-        global_text = f"# file: {path.name}\n# context: global_scope_and_imports\n" + text[:global_end_char]
+        global_end_char = min(
+            line_starts[global_end_line], self.max_chunk_size
+        )
+        global_text = (
+            f"# file: {path.name}\n# context: "
+            f"global_scope_and_imports\n" + text[:global_end_char]
+        )
         chunks.extend(self._split_large_chunk(path, global_text, 0))
 
         # Helper to extract raw text boundaries safely
@@ -45,63 +87,116 @@ class PythonChunker:
             # Handle Standalone Top-Level Functions
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 node_text, s_char, _ = get_node_text(node)
-                if not node_text: continue
-                meta = f"# file: {path.name}\n# context: function {node.name}\n"
-                chunks.extend(self._split_large_chunk(path, meta + node_text, s_char))
+                if not node_text:
+                    continue
+                meta = (
+                    f"# file: {path.name}\n"
+                    f"# context: function {node.name}\n"
+                )
+                chunks.extend(
+                    self._split_large_chunk(path, meta + node_text, s_char)
+                )
 
             # Handle Classes and their internal methods
             elif isinstance(node, ast.ClassDef):
                 class_text, class_s_char, _ = get_node_text(node)
-                if not class_text: continue
-                
+                if not class_text:
+                    continue
+
                 # Chunk the Class definition as its own structural unit
-                class_meta = f"# file: {path.name}\n# context: class {node.name}\n"
-                chunks.extend(self._split_large_chunk(path, class_meta + class_text, class_s_char))
+                class_meta = (
+                    f"# file: {path.name}\n# context: class {node.name}\n"
+                )
+                chunks.extend(
+                    self._split_large_chunk(
+                        path, class_meta + class_text, class_s_char
+                    )
+                )
 
                 # Process inner methods with explicit parent context injection
                 for sub_node in node.body:
-                    if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        method_text, method_s_char, _ = get_node_text(sub_node)
-                        if not method_text: continue
-                        
-                        # Inject parent class name so embedding models can map it accurately
-                        method_meta = f"# file: {path.name}\n# context: class {node.name} -> method {sub_node.name}\n"
-                        chunks.extend(self._split_large_chunk(path, method_meta + method_text, method_s_char))
+                    if isinstance(
+                        sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)
+                    ):
+                        method_text, method_s_char, _ = get_node_text(
+                            sub_node
+                        )
+                        if not method_text:
+                            continue
+
+                        # Inject parent class context
+                        method_meta = (
+                            f"# file: {path.name}\n"
+                            f"# context: class {node.name} -> "
+                            f"method {sub_node.name}\n"
+                        )
+                        chunks.extend(
+                            self._split_large_chunk(
+                                path,
+                                method_meta + method_text,
+                                method_s_char,
+                            )
+                        )
 
         if not chunks:
             return self._split_large_chunk(path, text, 0)
-            
+
         return chunks
 
-    def _split_large_chunk(self, path: Path, text: str, start_offset: int) -> list[Chunk]:
-        """Splits text at line boundaries using a true sliding window overlap."""
+    def _split_large_chunk(
+        self, path: Path, text: str, start_offset: int
+    ) -> list[Chunk]:
+        """Split a long string at line boundaries using a sliding window.
+
+        Iteratively groups lines together until the maximum character
+        constraint is reached, creating stable chunks. Upon saving a
+        chunk, it calculates a standard 200-character line-level
+        lookback overlap to prevent information fragmentation across
+        processing boundaries. Unique chunk tracking IDs are produced
+        by hashing file path details together with absolute starting
+        coordinates.
+
+        Args:
+            path: The pathlib.Path pointing to the source file.
+            text: The block of textual code contents to partition.
+            start_offset: An integer character index tracking where this
+              specific text block originally begins inside the root
+              source file.
+
+        Returns:
+            A list of instantiated and schema-validated Chunk elements.
+        """
         lines = text.splitlines(keepends=True)
         chunks: list[Chunk] = []
-        
-        line_lengths = [len(l) for l in lines]
+
+        line_lengths = [len(li) for li in lines]
         num_lines = len(lines)
         start_line_idx = 0
-        
+
         while start_line_idx < num_lines:
             current_chunk_lines = []
             current_size = 0
             end_line_idx = start_line_idx
-            
+
             while end_line_idx < num_lines:
                 next_line_len = line_lengths[end_line_idx]
-                if current_size + next_line_len > self.max_chunk_size and current_chunk_lines:
+                if (
+                    current_size + next_line_len > self.max_chunk_size
+                    and current_chunk_lines
+                ):
                     break
                 current_chunk_lines.append(lines[end_line_idx])
                 current_size += next_line_len
                 end_line_idx += 1
-                
+
             chunk_text_str = "".join(current_chunk_lines)
             relative_start = sum(line_lengths[:start_line_idx])
             absolute_start = start_offset + relative_start
             absolute_end = absolute_start + len(chunk_text_str)
-            
-            chunk_id = hashlib.md5(f"{path}{absolute_start}".encode()).hexdigest()
-            
+
+            raw_hash_input = f"{path}{absolute_start}".encode()
+            chunk_id = hashlib.md5(raw_hash_input).hexdigest()
+
             chunks.append(
                 Chunk(
                     chunk_id=chunk_id,
@@ -112,25 +207,24 @@ class PythonChunker:
                     last_character_index=absolute_end,
                 )
             )
-            
+
             if end_line_idx == num_lines:
                 break
-                
+
             overlap_target = 200
             overlap_size = 0
             next_start_idx = end_line_idx
-            
+
             while next_start_idx > start_line_idx:
                 prev_line_len = line_lengths[next_start_idx - 1]
                 if overlap_size + prev_line_len > overlap_target:
                     break
                 overlap_size += prev_line_len
                 next_start_idx -= 1
-                
+
             if next_start_idx >= end_line_idx:
                 start_line_idx = end_line_idx
             else:
                 start_line_idx = next_start_idx
 
         return chunks
-
