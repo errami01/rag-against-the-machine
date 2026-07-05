@@ -3,7 +3,7 @@
 
 A Retrieval-Augmented Generation (RAG) system built for the 42 School **RAG Against the Machine** project.
 
-The application indexes a local repository (documentation and source code), retrieves the most relevant chunks using BM25 lexical search, and generates grounded answers using **Qwen3-0.6B**.
+The application indexes a local repository (documentation and source code), retrieves the most relevant chunks using BM25 lexical search, and generates answers after providing context using **Qwen3-0.6B**.
 
 ---
 
@@ -13,11 +13,13 @@ The application indexes a local repository (documentation and source code), retr
 - Markdown and source code parsing
 - Python AST-aware chunking
 - BM25 lexical retrieval
+- two-stage retrieval with neural reranking.
 - Identifier-aware tokenizer
 - Dataset search evaluation
 - Recall@k evaluation
 - Question answering using Qwen3-0.6B
 - Batch answer generation
+- Local LLM inference via vLLM
 
 ---
 
@@ -50,6 +52,9 @@ The application indexes a local repository (documentation and source code), retr
          ▼                                ▼
      search                         search_dataset
          │                                │
+         ▼                                │
+Reranke top-k chunks                      │
+         │                                │
          ▼                                ▼
     Top-k Chunks                   Search Results
          │                                │
@@ -71,11 +76,11 @@ The application indexes a local repository (documentation and source code), retr
 ```
 src/student/
 
-├── chunking/
-│   ├── markdown.py
-│   ├── python.py
+├── ingestion/
+│   ├── chunker.py
+│   ├── indexer.py
 │   └── ...
-│
+|
 ├── datasets/
 │   └── loader.py
 │
@@ -90,9 +95,9 @@ src/student/
 │   ├── prompts.py
 │   └── qwen.py
 │
-├── indexing/
-│
 ├── models/
+│   ├── chunk.py
+│   └── dataset.py
 │
 ├── retrieval/
 │   ├── search.py
@@ -153,6 +158,7 @@ This performs:
 - chunk generation
 - tokenization
 - BM25 index construction
+- Retrieval with neural reranking
 
 Generated files are stored inside:
 
@@ -197,8 +203,29 @@ uv run python -m student search_dataset \
 --dataset_path data/datasets/UnansweredQuestions/dataset_docs_public.json \
 --save_path data/output/search_results/docs_public.json
 ```
-
----
+Example output:
+```json
+{
+"search_results": [
+        {
+                "question_id": "q1",
+                "retrieved_sources": [
+                        {
+                                "file_path": "docs/serving/openai_compatible_server.md",
+                                "first_character_index": 9867,
+                                "last_character_index": 10100
+                        },
+                        {
+                                "file_path": "vllm/entrypoints/openai/api_server.py",
+                                "first_character_index": 267,
+                                "last_character_index": 400
+                        }
+                ]
+        }
+],
+"k": 10
+}
+```
 
 # Evaluation
 
@@ -213,10 +240,13 @@ uv run python -m student evaluate \
 Example output:
 
 ```
-Recall@1
-Recall@3
-Recall@5
-Recall@10
+🎯 Evaluation Results
+========================================
+Questions evaluated: 100
+Recall@1: 0.710
+Recall@3: 0.830
+Recall@5: 0.870
+Recall@10: 0.870
 ```
 
 ---
@@ -247,7 +277,28 @@ uv run python -m student answer_dataset \
 --search_results_path data/output/search_results/docs_public.json \
 --save_path data/output/answers/docs_public.json
 ```
-
+Example answer:
+```json
+"search_results": [
+        {
+                "question_id": "q1",
+                "retrieved_sources": [
+                        {
+                                "file_path": "docs/serving/openai_compatible_server.md",
+                                "first_character_index": 9867,
+                                "last_character_index": 10100
+                        },
+                        {
+                                "file_path": "vllm/entrypoints/openai/api_server.py",
+                                "first_character_index": 267,
+                                "last_character_index": 400
+                        }
+                ],
+                "answer": "To configure the OpenAI compatible server in vLLM..."
+        }
+],
+"k": 10
+```
 ---
 
 # Retrieval Strategy
@@ -258,10 +309,11 @@ Pipeline:
 
 1. Query tokenization
 2. BM25 retrieval
-3. Top-k chunk selection
-4. Context construction
-5. Prompt generation
-6. LLM inference
+3. Neural reranking.
+4. Top-k chunk selection
+5. Context construction
+6. Prompt generation
+7. LLM inference
 
 ---
 
@@ -396,10 +448,10 @@ Final public evaluation:
 ## Documentation
 
 ```
-Recall@1  = 0.60
-Recall@3  = 0.78
-Recall@5  = 0.84
-Recall@10 = 0.87
+Recall@1: 0.710
+Recall@3: 0.830
+Recall@5: 0.870
+Recall@10: 0.870
 ```
 
 Requirement:
@@ -461,19 +513,36 @@ Advantages:
 This separation also allows experimenting with different language models without rebuilding the retrieval index.
 
 ---
+# Challenges Faced
 
-# Future Improvements
+As this was my first time building a Retrieval-Augmented Generation (RAG) system, I encountered a steep learning curve. 
 
-- Hybrid BM25 + embeddings retrieval
-- Cross-encoder reranking
-- Better AST chunk hierarchy
-- Context compression
-- Quantized LLM inference
-- Streaming generation
-- Incremental indexing
+**Key Challenges:**
+* **Conceptual Research:** Spending foundational time understanding the underlying mechanics before writing code.
+* **Pipeline Integration:** Managing data flow across the entire lifecycle, including text chunking, database indexing, vector retrieval, and LLM prompt generation.
 
----
+# Resources
+## Web 
+Youtube videos was the main ressouce to explain some new concepts like rag, bm25 indexing and many other tools used to build this project like:
 
-# Author
+-[What is Retrieval-Augmented Generation (RAG)? ](https://www.youtube.com/watch?v=T-D1OfcDW1M)
 
-42 School — RAG Against the Machine Project
+-[BM25 ](https://www.youtube.com/watch?v=hiJcEaiuw_E)
+
+## Use of Artificial Intelligence
+
+Artificial Intelligence tools were used throughout the project as a development assistant. All design decisions, implementation, testing, debugging, and validation were reviewed and integrated by the author.
+
+AI assistance was used for the following tasks:
+
+- Explaining concepts related to Retrieval-Augmented Generation (RAG), BM25, tokenization, and prompt engineering.
+- Understanding the architecture and source code of the vLLM project.
+- Discussing software architecture and component organization.
+- Reviewing Python implementations and suggesting refactoring opportunities.
+- Assisting in debugging runtime errors and improving error handling.
+- Helping design the command-line interface and project structure.
+- Brainstorming retrieval improvements, including identifier-aware tokenization and hybrid retrieval strategies.
+- Reviewing prompt design for Qwen3-0.6B and improving answer generation quality.
+- Assisting in writing and proofreading the project documentation and README.
+
+AI-generated content was always reviewed, adapted, tested, and integrated manually before being included in the final project.

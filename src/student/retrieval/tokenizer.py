@@ -16,7 +16,7 @@ CAMEL_SPLIT_PATTERN = re.compile(r'(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])'
 @lru_cache(maxsize=2048)
 def tokenize(text: str) -> tuple[str, ...]:
     tokens = []
-    
+
     # 1. Find all standard alphanumeric blocks
     raw_tokens = TOKEN_PATTERN.findall(text)
     # if file_type == "python":

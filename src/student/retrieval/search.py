@@ -33,7 +33,6 @@ class SearchEngine:
             return cached_result
 
         query_tokens = list(tokenize(query))
-
         results, scores = (
             self.retriever.retrieve(
                 [query_tokens],
@@ -46,7 +45,6 @@ class SearchEngine:
             self.chunks[index]
             for index in indices
         ]
-        self.cache.set(query, k, candidates)
         scores = self.reranker.rerank(
         query,
         [chunk.text for chunk in candidates],
@@ -57,11 +55,13 @@ class SearchEngine:
             key=lambda x: x[0],
             reverse=True,
         )
-
-        return [
+        final_results = [
             chunk
             for _, chunk in ranked[:k]
         ]
+        self.cache.set(query, k, final_results)
+
+        return final_results
 
 
     # 1. Initialize the lightweight CPU-optimized Reranker model
