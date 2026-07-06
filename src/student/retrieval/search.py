@@ -46,7 +46,7 @@ class SearchEngine:
                 "Please run the indexer before using the search engine."
             )
 
-    def search(self, query: str, k: int = 30) -> list[Chunk]:
+    def search(self, query: str, k: int = 5) -> list[Chunk]:
         """Execute a complete retrieval-and-rerank sequence for a query.
 
         Checks the internal cache first. If a cache miss occurs, tokenizes
@@ -57,7 +57,7 @@ class SearchEngine:
         Args:
             query: The natural language search query string.
             k: The number of top-ranked document chunks to return.
-            Defaults to 30.
+            Defaults to 5.
 
         Returns:
             A list of verified Chunk data structures sorted by decreasing

@@ -8,6 +8,12 @@ from student.evaluation.evaluator import Evaluator
 from student.utils.json import load_json
 import time
 import json
+from pathlib import Path
+from student.models.dataset import (
+    MinimalSearchResults,
+    MinimalSource,
+    StudentSearchResults,
+)
 
 
 class CLI:
@@ -50,7 +56,7 @@ class CLI:
             print(e)
             return
 
-    def search(self, query: str, k: int = 1) -> None:
+    def search(self, query: str, k: int = 5) -> None:
         """Execute a query search against the document index and print results.
 
         Fetches the top-K matching text fragments via the retrieval engine
@@ -62,13 +68,31 @@ class CLI:
               Defaults to 1.
         """
         try:
+            # 1. Define your target folder and file path
+            output_dir = Path("data/output/single_search_results")
+            file_path = output_dir / "single_search_results.json"
+            # 2. Automatically create parent directories if missing
+            output_dir.mkdir(parents=True, exist_ok=True)
             engine = SearchEngine()
-            results = engine.search(query, k)
+            chunks = engine.search(query, k)
+            result: MinimalSearchResults = MinimalSearchResults(
+                question_id="single_search",
+                question=query,
+                retrieved_sources=[
+
+                MinimalSource(
+                    file_path=chunk.file_path,
+                    first_character_index=chunk.first_character_index,
+                    last_character_index=chunk.last_character_index,
+                )
+                for chunk in chunks
+            ])
+            file_path.write_text(result.model_dump_json(indent=4), encoding="utf-8")
         except Exception as e:
             print(f"Error occurred while searching: {e}")
             return
 
-        for i, chunk in enumerate(results, start=1):
+        for i, chunk in enumerate(chunks, start=1):
             print()
             print(f"Rank {i}")
             print(f"File: {chunk.file_path}")
