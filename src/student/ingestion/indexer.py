@@ -35,9 +35,13 @@ class Indexer:
               directories (`data/processed/...`) fails.
         """
         repo_path = "data/raw/vllm-0.10.1"
-        files = discover_files(
-            Path(repo_path)
-        )
+        try:
+            files = discover_files(
+                Path(repo_path)
+            )
+        except Exception as e:
+            raise e
+
 
         chunker = Chunker(
             max_chunk_size

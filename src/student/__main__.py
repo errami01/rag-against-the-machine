@@ -1,6 +1,5 @@
 import fire
 from student.ingestion.indexer import (Indexer)
-from student.models import Chunk
 from student.retrieval.search import (SearchEngine)
 from student.retrieval.search_dataset import DatasetSearcher
 from student.generation.answer import AnswerService
@@ -8,10 +7,6 @@ from student.generation.answer_dataset import DatasetAnswerer
 from student.evaluation.evaluator import Evaluator
 import time
 import json
-
-
-import json
-from pathlib import Path
 
 
 class CLI:
@@ -48,7 +43,11 @@ class CLI:
         Args:
             max_chunk_size: The character limit constraint for each text chunk.
         """
-        Indexer().index(max_chunk_size)
+        try:
+            Indexer().index(max_chunk_size)
+        except Exception as e:
+            print(e)
+            return
 
     def search(self, query: str, k: int = 1) -> None:
         """Execute a query search against the document index and print results.

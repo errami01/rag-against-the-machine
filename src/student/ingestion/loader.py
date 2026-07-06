@@ -21,5 +21,6 @@ def discover_files(root: Path) -> list[Path]:
             and path.suffix.lower() in SUPPORTED_EXTENSIONS
         ):
             files.append(path)
-
+    if not files:
+        raise Exception("No file found")
     return files
