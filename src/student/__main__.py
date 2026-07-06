@@ -5,6 +5,7 @@ from student.retrieval.search_dataset import DatasetSearcher
 from student.generation.answer import AnswerService
 from student.generation.answer_dataset import DatasetAnswerer
 from student.evaluation.evaluator import Evaluator
+from student.utils.json import load_json
 import time
 import json
 
@@ -60,8 +61,8 @@ class CLI:
             k: The maximum number of relevant documents to retrieve. 
               Defaults to 1.
         """
-        engine = SearchEngine()
         try:
+            engine = SearchEngine()
             results = engine.search(query, k)
         except Exception as e:
             print(f"Error occurred while searching: {e}")
@@ -95,20 +96,22 @@ class CLI:
             save_path: The destination path where search matrices are written.
             k: Retrieval ceiling allocated per query instance. Defaults to 10.
         """
-        DatasetSearcher().run(
-            dataset_path=dataset_path,
-            save_path=save_path,
-            k=k,
-        )
-
+        try:
+            DatasetSearcher().run(
+                dataset_path=dataset_path,
+                save_path=save_path,
+                k=k,
+            )
+        except Exception as e:
+            print(e)
+            return
     def stats(self) -> None:
         """Calculate and log processing statistics for the current index.
         
         Loads the active chunk configuration collection and prints out the 
         total volume of items managed inside the global data matrix.
         """
-        from student.utils.json import load_json
-
+       
         chunks = load_json("data/processed/chunks/chunks.json")
         print(f"Chunks: {len(chunks)}")
 
@@ -126,7 +129,11 @@ class CLI:
             backend: The active inference infrastructure tag. Defaults to 
               "transformers".
         """
-        response = AnswerService(backend=backend).answer(question, k=k)
+        try:
+            response = AnswerService(backend=backend).answer(question, k=k)
+        except Exception:
+            print(f"Answer Error: {e}")
+            return
         print(response)
 
     def answer_dataset(
@@ -146,10 +153,13 @@ class CLI:
             backend: The target model backend platform identifier. Defaults to 
               "transformers".
         """
-        DatasetAnswerer().run(
-            search_results_path,
-            save_path,
-        )
+        try:
+            DatasetAnswerer().run(
+                search_results_path,
+                save_path,
+            )
+        except Exception as e:
+            print(f"Answer dataset Error: {e}")
 
     def evaluate(
         self,
@@ -167,19 +177,23 @@ class CLI:
             dataset_path: The path to the gold-standard reference dataset.
             k: The top-K retrieval context validation limit. Defaults to 10.
         """
-        Evaluator().evaluate(
-            student_answer_path,
-            dataset_path,
-            k,
-        )
+        try:
+            Evaluator().evaluate(
+                student_answer_path,
+                dataset_path,
+                k,
+            )
+        except Exception as e:
+            print(f"Evaluation Error: {e}")
+            return
 
 if __name__ == "__main__":
     # 1. Start the timer
     start_time = time.perf_counter()
-    # try:
-    fire.Fire(CLI)
-    # except Exception as e:
-    #     print(f"[CLI ERROR] {e}")
+    try:
+        fire.Fire(CLI)
+    except Exception as e:
+        print(f"[CLI ERROR] {e}")
     # 2. Stop the timer
     end_time = time.perf_counter()
 
