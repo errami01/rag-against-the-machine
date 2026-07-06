@@ -7,7 +7,7 @@ from student.utils.json import load_json
 def load_dataset(path: str | Path) -> RagDataset:
     """Loads and validates an evaluation dataset from a JSON file.
 
-    Reads raw data from the specified path and handles parsing through the 
+    Reads raw data from the specified path and handles parsing through the
     RagDataset Pydantic model to enforce strict schema adherence for
     evaluation questions.
 

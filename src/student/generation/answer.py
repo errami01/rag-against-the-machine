@@ -1,21 +1,20 @@
 from student.generation.prompts import ANSWER_PROMPT
-from student.generation.factory import BackendFactory 
+from student.generation.factory import BackendFactory
 from student.retrieval.search import SearchEngine
-from functools import lru_cache
-
 from functools import lru_cache
 
 
 def build_context(chunks, max_chars: int = 4000) -> str:
     """Assemble a combined context string from document chunks.
 
-    Iterates through retrieved text chunks, formats them with their clear source 
-    file headers, and chains them together up to a strict maximum character 
+    Iterates through retrieved text chunks, formats them with their clear
+      source
+    file headers, and chains them together up to a strict maximum character
     budget limit.
 
     Args:
         chunks: An iterable collection of verified Chunk data models.
-        max_chars: The maximum length cutoff parameter allowed for the unified 
+        max_chars: The maximum length cutoff parameter allowed for the unified
           string layout. Defaults to 4000.
 
     Returns:
@@ -46,7 +45,7 @@ def build_context(chunks, max_chars: int = 4000) -> str:
 def build_prompt(question: str, context: str) -> str:
     """Construct a standardized LLM inference prompt sequence.
 
-    Injects the packed reference context payload along with the input query 
+    Injects the packed reference context payload along with the input query
     into a predefined baseline instruction template layout.
 
     Args:
@@ -65,8 +64,9 @@ def build_prompt(question: str, context: str) -> str:
 class AnswerService:
     """A business logic coordinator for answering standalone queries.
 
-    This service connects individual system components together by executing 
-    searches, organizing extracted text, and routing instructions to an inference 
+    This service connects individual system components together by executing
+    searches, organizing extracted text, and routing instructions to an
+      inference
     backend to resolve individual requests.
     """
 
@@ -77,7 +77,7 @@ class AnswerService:
         """Initialize the coordination service and create model connections.
 
         Args:
-            backend: The identifier tag mapping the specific active model 
+            backend: The identifier tag mapping the specific active model
               engine stack configuration. Defaults to "transformers".
         """
         self.search_engine = SearchEngine()
@@ -89,8 +89,8 @@ class AnswerService:
     def answer(self, question: str, k: int = 5) -> str:
         """Generate a contextual answer for an input question.
 
-        Fetches top-K document blocks from the index, reduces fragments into a 
-        budget-aligned text sequence, builds the localized target prompt, and 
+        Fetches top-K document blocks from the index, reduces fragments into a
+        budget-aligned text sequence, builds the localized target prompt, and
         requests inference from the backend gateway.
 
         Args:
@@ -98,8 +98,8 @@ class AnswerService:
             k: The document chunk retrieval window limit. Defaults to 5.
 
         Returns:
-            The raw textual solution produced by the language model, or a fallback 
-            error string if inference fails.
+            The raw textual solution produced by the language model, or a
+              fallback error string if inference fails.
         """
         chunks = (self.search_engine.search(question, k=k))
 
@@ -110,5 +110,5 @@ class AnswerService:
             response = self.llm.generate(prompt)
         except Exception as e:
             print(f"[LLM ERROR] {e}")
-            response = "Error generating answer"        
+            response = "Error generating answer"
         return response

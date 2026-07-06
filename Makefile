@@ -13,7 +13,7 @@ clean:
 
 lint:
 	uv run flake8 . --exclude=.venv,__pycache__,.mypy_cache,data
-	uv run mypy . \
+	uv run mypy . --exclude=data \
 	--warn-return-any \
 	--warn-unused-ignores \
 	--ignore-missing-imports \

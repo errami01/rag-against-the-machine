@@ -140,6 +140,10 @@ Install dependencies.
 uv sync
 ```
 
+Install vllm-cpu.
+```bash
+uv pip install vllm-cpu --extra-index-url https://download.pytorch.org/whl/cpu
+``` 
 ---
 
 # Indexing

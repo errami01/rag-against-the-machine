@@ -4,10 +4,9 @@ from student.generation.answer import (
     build_prompt,
     build_context,
 )
-from student.generation.factory import BackendFactory 
+from student.generation.factory import BackendFactory
 from student.models.dataset import (
     MinimalAnswer,
-    StudentSearchResults,
     StudentSearchResultsAndAnswer,
 )
 from student.retrieval.chunk_lookup import ChunkLookup
@@ -16,11 +15,12 @@ from student.utils.json import save_json
 
 
 class DatasetAnswerer:
-    """An automated processing hub for generating batch answers from search hits.
+    """An automated processing hub for generating batch answers from
+      search hits.
 
-    This engine loads pre-computed search outputs, retrieves full text blocks
-    from cache coordinates, builds prompt contexts, and flushes generated LLM responses 
-    to disk.
+    This engine loads pre-computed search outputs, retrieves full text
+    blocks from cache coordinates, builds prompt contexts, and flushes
+    generated LLM responses to disk.
     """
 
     def run(
@@ -31,20 +31,21 @@ class DatasetAnswerer:
     ) -> None:
         """Run batch inference over a saved manifest of search result hits.
 
-        Processes question objects sequentially, reconstructs their text content
-        using source coordinate lookups, merges fragments into prompt structures, 
-        and updates the output schema with completed predictions.
+        Processes question objects sequentially, reconstructs their text
+        content using source coordinate lookups, merges fragments into prompt
+        structures, and updates the output schema with completed predictions.
 
         Args:
             search_results_path: The file path to the saved query search JSON.
             save_path: The target path where generated responses are stored.
             backend: The target model framework provider identifier string.
-              Defaults to "transformers".
+                Defaults to "transformers".
 
         Raises:
             OSError: If reading input files or writing output binaries fails.
             ValidationError: If data properties break schema definitions.
         """
+
         results = load_search_results(
             search_results_path
         )

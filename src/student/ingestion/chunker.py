@@ -4,13 +4,12 @@ from student.ingestion.markdown_chunker import (MarkdownChunker)
 from student.ingestion.python_chunker import (PythonChunker)
 from student.models import Chunk
 
-from pathlib import Path
 
 class Chunker:
     """A polymorphic routing layer for handling multi-format file chunking.
 
     This class serves as a unified entry point for the text partitioning
-      pipeline. 
+      pipeline.
     It instantiates specialized format chunkers (Python and Markdown) and
       delegates incoming files to the appropriate chunking strategy based
       on file extensions.

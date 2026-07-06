@@ -4,12 +4,12 @@ from student.generation.backend import LLMBackend
 
 
 class VLLMBackend(LLMBackend):
-    """An inference gateway interface for interacting with a localized vLLM engine server.
+    """An inference gateway interface for interacting with a localized vLLM.
 
-    This class overrides the abstract base LLMBackend configuration, leveraging an 
-    OpenAI-compatible client profile to communicate with an isolated, locally self-hosted 
-    vLLM instance. It enforces system-level prompting rules optimized for strict context 
-    grounding tasks.
+    This class overrides the abstract base LLMBackend configuration,
+    leveraging an OpenAI-compatible client profile to communicate with an
+    isolated, locally self-hosted vLLM instance. It enforces system-level
+    prompting rules optimized for strict context grounding tasks.
     """
 
     def __init__(
@@ -24,7 +24,7 @@ class VLLMBackend(LLMBackend):
             base_url: The full network target address hosting the vLLM server
               endpoint stack. Defaults to "http://localhost:8000/v1".
             model: The exact text string tag mapping the targeted active model
-              checkpoint 
+              checkpoint
               loaded on the server node. Defaults to "Qwen/Qwen3-0.6B".
         """
         self.client = OpenAI(

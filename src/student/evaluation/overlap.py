@@ -5,8 +5,8 @@ def overlap_ratio(a: MinimalSource, b: MinimalSource) -> float:
     """Calculate the ratio of source B that is covered by source A.
 
     Computes the character-level intersection between two document sources
-    and normalizes the overlapping length by the total length of the gold-truth
-    source B.
+    and normalizes the overlapping length by the total length of the
+      gold-truth source B.
 
     Args:
         a: The retrieved candidate source snippet to inspect.
@@ -14,8 +14,8 @@ def overlap_ratio(a: MinimalSource, b: MinimalSource) -> float:
 
     Returns:
         The percentage of source B overlapped by source A as a floating-point
-        value between 0.0 and 1.0. Returns 0.0 if file paths do not match or if
-        source B has a non-positive length.
+        value between 0.0 and 1.0. Returns 0.0 if file paths do not match
+          or if source B has a non-positive length.
     """
     if a.file_path != b.file_path:
         return 0.0
@@ -33,7 +33,8 @@ def overlap_ratio(a: MinimalSource, b: MinimalSource) -> float:
 
 
 def is_match(retrieved: MinimalSource, gold: MinimalSource) -> bool:
-    """Determine if a retrieved source sufficiently matches a ground-truth chunk.
+    """Determine if a retrieved source sufficiently matches a ground-truth
+      chunk.
 
     Evaluates if the character overlap ratio covers at least a strict 5 percent
     threshold of the target gold-truth content.

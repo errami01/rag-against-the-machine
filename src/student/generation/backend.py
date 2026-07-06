@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 
 
-from abc import ABC, abstractmethod
-
-
 class LLMBackend(ABC):
     """An abstract base class defining standard language model interfaces.
-    
-    Serves as the blueprint component for all integrated text generation 
-    backends, ensuring consistent contract methods across varying modeling 
+
+    Serves as the blueprint component for all integrated text generation
+    backends, ensuring consistent contract methods across varying modeling
     architectures.
     """
 
@@ -22,7 +19,7 @@ class LLMBackend(ABC):
 
         Args:
             prompt: The formatted instruction string submitted to the model.
-            max_new_tokens: The absolute upper token generation cutoff limit 
+            max_new_tokens: The absolute upper token generation cutoff limit
               assigned for the output text window. Defaults to 128.
 
         Returns:
