@@ -1,5 +1,5 @@
 from sentence_transformers import CrossEncoder
-
+from typing import cast
 
 class Reranker:
     """A cross-encoder model wrapper for reranking retrieved documents.
@@ -51,4 +51,4 @@ class Reranker:
             for document in documents
         ]
 
-        return self.model.predict(pairs).tolist()
+        return cast(list[float], self.model.predict(pairs).tolist())
