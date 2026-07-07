@@ -73,10 +73,10 @@ class PythonChunker:
         chunks.extend(self._split_large_chunk(path, global_text, 0))
 
         # Helper to extract raw text boundaries safely
-        def get_node_text(node):
-            s_line = node.lineno
+        def get_node_text(node: ast.AST) -> tuple[str, int, int]:
+            s_line = getattr(node, "lineno", None)
             e_line = getattr(node, "end_lineno", None)
-            if e_line is None:
+            if s_line is None or e_line is None:
                 return "", 0, 0
             s_char = line_starts[s_line - 1]
             e_char = line_starts[min(e_line, len(line_starts) - 1)]
@@ -174,7 +174,7 @@ class PythonChunker:
         start_line_idx = 0
 
         while start_line_idx < num_lines:
-            current_chunk_lines = []
+            current_chunk_lines: list[str] = []
             current_size = 0
             end_line_idx = start_line_idx
 

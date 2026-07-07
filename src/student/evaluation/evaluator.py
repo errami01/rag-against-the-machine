@@ -1,7 +1,7 @@
 from student.utils.json import load_json
 from student.datasets.loader import load_dataset
 
-from student.models.dataset import StudentSearchResults
+from student.models.dataset import StudentSearchResults, AnsweredQuestion
 from student.evaluation.recall import recall_at_k
 
 
@@ -36,7 +36,9 @@ class Evaluator:
               expected target Pydantic schemas.
         """
         dataset = load_dataset(dataset_path)
-
+        rag_questions = [
+            AnsweredQuestion.model_validate(
+                q.model_dump()) for q in dataset.rag_questions]
         student = StudentSearchResults.model_validate(
             load_json(student_path)
         )
@@ -47,7 +49,7 @@ class Evaluator:
         }
 
         r1, r3, r5, r10 = [], [], [], []
-        for q in dataset.rag_questions:
+        for q in rag_questions:
             if not getattr(q, "sources", None):
                 continue
 
@@ -83,7 +85,7 @@ class Evaluator:
                 )
             )
 
-        def avg(x):
+        def avg(x: list[float]) -> float:
             return sum(x) / len(x) if x else 0.0
 
         print("\n🎯 Evaluation Results")

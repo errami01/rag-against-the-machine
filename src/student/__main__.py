@@ -12,7 +12,6 @@ from pathlib import Path
 from student.models.dataset import (
     MinimalSearchResults,
     MinimalSource,
-    StudentSearchResults,
 )
 
 
@@ -79,15 +78,16 @@ class CLI:
                 question_id="single_search",
                 question=query,
                 retrieved_sources=[
-
-                MinimalSource(
-                    file_path=chunk.file_path,
-                    first_character_index=chunk.first_character_index,
-                    last_character_index=chunk.last_character_index,
-                )
-                for chunk in chunks
-            ])
-            file_path.write_text(result.model_dump_json(indent=4), encoding="utf-8")
+                    MinimalSource(
+                        file_path=chunk.file_path,
+                        first_character_index=chunk.first_character_index,
+                        last_character_index=chunk.last_character_index,
+                    )
+                    for chunk in chunks
+                ]
+            )
+            file_path.write_text(
+                result.model_dump_json(indent=4), encoding="utf-8")
         except Exception as e:
             print(f"Error occurred while searching: {e}")
             return

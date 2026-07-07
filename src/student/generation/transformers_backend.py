@@ -15,7 +15,7 @@ class TransformersBackend(LLMBackend):
 
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls) -> 'TransformersBackend':
         """Create and initialize the singleton model and tokenizer instance.
         """
         if cls._instance is None:

@@ -74,5 +74,6 @@ class VLLMBackend(LLMBackend):
             temperature=0,
             max_tokens=max_new_tokens,
         )
-
+        if not response.choices or not response.choices[0].message.content:
+            raise ValueError("No response generated from the model.")
         return response.choices[0].message.content.strip()
