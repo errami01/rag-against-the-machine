@@ -63,6 +63,7 @@ class VLLMBackend(LLMBackend):
                 {
                     "role": "system",
                     "content": (
+                        "You are an expert assistant for the vLLM project."
                         "Answer only using the provided context."
                     ),
                 },
@@ -73,6 +74,14 @@ class VLLMBackend(LLMBackend):
             ],
             temperature=0,
             max_tokens=max_new_tokens,
+            
+            extra_body={
+                "chat_template_kwargs": {
+                    "enable_thinking": False,
+                    "add_generation_prompt": True,
+                }
+            }
+
         )
         if not response.choices or not response.choices[0].message.content:
             raise ValueError("No response generated from the model.")
