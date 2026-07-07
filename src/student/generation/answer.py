@@ -6,7 +6,7 @@ from typing import List
 from student.models.chunk import Chunk
 
 
-def build_context(chunks: List[Chunk], max_chars: int = 4000) -> str:
+def build_context(chunks: List[Chunk], max_chars: int = 2000) -> str:
     """Assemble a combined context string from document chunks.
 
     Iterates through retrieved text chunks, formats them with their clear
@@ -17,7 +17,7 @@ def build_context(chunks: List[Chunk], max_chars: int = 4000) -> str:
     Args:
         chunks: An iterable collection of verified Chunk data models.
         max_chars: The maximum length cutoff parameter allowed for the unified
-          string layout. Defaults to 4000.
+          string layout. Defaults to 2000.
 
     Returns:
         A combined context string separated by double line breaks.
