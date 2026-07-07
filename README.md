@@ -139,11 +139,25 @@ Install dependencies.
 ```bash
 uv sync
 ```
-
-Install vllm-cpu.
+## Using vllm
+Install vllm-cpu in a separate venv.
 ```bash
 uv pip install vllm-cpu --extra-index-url https://download.pytorch.org/whl/cpu
 ``` 
+Run the server in a separate terminal at 42 machine.
+```bash
+VLLM_TARGET_DEVICE=cpu python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-0.6B \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --max-model-len 4096 \
+  --gpu-memory-utilization 0.5 \
+  --max-num-seqs 128
+```
+Generate an answer:
+```bash
+ uv run python -m student answer "How to configure OpenAI server?" --k 10 --backend vllm
+ ```
 ---
 
 # Indexing
