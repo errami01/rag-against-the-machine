@@ -2,9 +2,11 @@ from student.generation.prompts import ANSWER_PROMPT
 from student.generation.factory import BackendFactory
 from student.retrieval.search import SearchEngine
 from functools import lru_cache
+from typing import List
+from student.models.chunk import Chunk
 
 
-def build_context(chunks, max_chars: int = 4000) -> str:
+def build_context(chunks: List[Chunk], max_chars: int = 4000) -> str:
     """Assemble a combined context string from document chunks.
 
     Iterates through retrieved text chunks, formats them with their clear

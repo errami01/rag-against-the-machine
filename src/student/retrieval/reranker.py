@@ -1,6 +1,7 @@
 from sentence_transformers import CrossEncoder
 from typing import cast
 
+
 class Reranker:
     """A cross-encoder model wrapper for reranking retrieved documents.
 

@@ -1,8 +1,8 @@
 uv run python -m student index --max_chunk_size 2000
-uv run python -m student search "What activation formats does the fused batched MoE layer return in vLLM?"
 uv run python -m student search_dataset  --dataset_path  data/datasets/UnansweredQuestions/dataset_code_public.json   --save_path data/output/search_results/code_public.json --k 10
 uv run python -m student search_dataset  --dataset_path  data/datasets/UnansweredQuestions/dataset_docs_public.json   --save_path data/output/search_results/docs_public.json --k 10
 uv run python -m student evaluate   data/output/search_results/code_public.json   data/datasets/AnsweredQuestions/dataset_code_public.json
 uv run python -m student evaluate   data/output/search_results/docs_public.json   data/datasets/AnsweredQuestions/dataset_docs_public.json
+uv run python -m student search "What activation formats does the fused batched MoE layer return in vLLM?"
 ./moulinette evaluate_student_search_results --student_answer_path ../data/output/search_results/docs_public.json  --dataset_path ../data/datasets/AnsweredQuestions/dataset_docs_public.json --k 10 --max_context_length 2000
 ./moulinette evaluate_student_search_results --student_answer_path ../data/output/search_results/code_public.json  --dataset_path ../data/datasets/AnsweredQuestions/dataset_code_public.json --k 10 --max_context_length 2000

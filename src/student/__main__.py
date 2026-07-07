@@ -76,7 +76,7 @@ class CLI:
             chunks = engine.search(query, k)
             result: MinimalSearchResults = MinimalSearchResults(
                 question_id="single_search",
-                question=query,
+                question_str=query,
                 retrieved_sources=[
                     MinimalSource(
                         file_path=chunk.file_path,

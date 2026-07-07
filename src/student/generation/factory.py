@@ -1,5 +1,6 @@
 from student.generation.transformers_backend import TransformersBackend
 from student.generation.vllm_backend import VLLMBackend
+from student.generation.backend import LLMBackend
 
 
 class BackendFactory:
@@ -10,7 +11,7 @@ class BackendFactory:
     """
 
     @staticmethod
-    def create(name: str):
+    def create(name: str) -> LLMBackend:
         """Create and return a concrete language model backend instance.
 
         Args:

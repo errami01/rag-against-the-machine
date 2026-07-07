@@ -1,5 +1,8 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer, PreTrainedTokenizerBase)
 from student.generation.backend import LLMBackend
+from typing import Any
 
 
 MODEL_NAME = "Qwen/Qwen3-0.6B"
@@ -12,8 +15,9 @@ class TransformersBackend(LLMBackend):
     leveraging a single in-memory model instance across the pipeline
     process to avoid redundant GPU memory allocations.
     """
-
-    _instance = None
+    tokenizer: PreTrainedTokenizerBase
+    model: Any
+    _instance: "TransformersBackend | None" = None
 
     def __new__(cls) -> 'TransformersBackend':
         """Create and initialize the singleton model and tokenizer instance.
@@ -79,7 +83,7 @@ class TransformersBackend(LLMBackend):
             add_generation_prompt=True,
             enable_thinking=False
         )
-        inputs = self.tokenizer(
+        inputs: dict[str, Any] = self.tokenizer(
             text,
             return_tensors="pt",
         ).to(self.model.device)
@@ -99,11 +103,15 @@ class TransformersBackend(LLMBackend):
         # )
 
         generated = outputs[0][inputs["input_ids"].shape[1]:]
-
-        return self.tokenizer.decode(
+        decoded_text = self.tokenizer.decode(
             generated,
-            skip_special_tokens=True,
-        ).strip()
+            skip_special_tokens=True
+            )
+
+        if isinstance(decoded_text, list):
+            decoded_text = " ".join(decoded_text)
+
+        return decoded_text.strip()
 
     @classmethod
     def get_instance(cls) -> 'TransformersBackend':
