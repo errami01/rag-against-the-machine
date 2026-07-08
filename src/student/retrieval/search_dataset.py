@@ -76,13 +76,10 @@ class DatasetSearcher:
             search_results=results,
             k=k,
         )
-
-        save_path = Path(save_path)
-
-        save_path.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+        file_name = Path(save_path).name
+        if not file_name.endswith(".json"):
+            file_name = Path(dataset_path).name
+            save_path = f"{save_path}/{file_name}"
 
         save_json(
             save_path,
