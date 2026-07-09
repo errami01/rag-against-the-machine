@@ -2,11 +2,16 @@ from student.generation.prompts import ANSWER_PROMPT
 from student.generation.factory import BackendFactory
 from student.retrieval.search import SearchEngine
 from functools import lru_cache
-from typing import List
+from typing import List, Tuple
 from student.models.chunk import Chunk
+from student.models.dataset import (
+    MinimalSource, MinimalAnswer, StudentSearchResultsAndAnswer)
+from student.utils.json import save_json
 
 
-def build_context(chunks: List[Chunk], max_chars: int = 2000) -> str:
+def build_context(
+        chunks: List[Chunk], max_chars: int = 4000
+        ) -> Tuple[str, List[Chunk]]:
     """Assemble a combined context string from document chunks.
 
     Iterates through retrieved text chunks, formats them with their clear
@@ -23,7 +28,7 @@ def build_context(chunks: List[Chunk], max_chars: int = 2000) -> str:
         A combined context string separated by double line breaks.
     """
     context_parts = []
-
+    used_chunks = []
     current_size = 0
 
     for chunk in chunks:
@@ -37,10 +42,10 @@ def build_context(chunks: List[Chunk], max_chars: int = 2000) -> str:
             break
 
         context_parts.append(text)
-
+        used_chunks.append(chunk)
         current_size += len(text)
 
-    return "\n\n".join(context_parts)
+    return "\n\n".join(context_parts), used_chunks
 
 
 @lru_cache(maxsize=1024)
@@ -104,12 +109,45 @@ class AnswerService:
               fallback error string if inference fails.
         """
         chunks = (self.search_engine.search(question, k=k))
+        answers: list[MinimalAnswer] = []
+        save_path = "data/output/answers/single_answer.json"
+        context, used_chunks = build_context(chunks)
+        used_sources = [
+                MinimalSource(
+                    file_path=chunk.file_path,
+                    first_character_index=chunk.first_character_index,
+                    last_character_index=chunk.last_character_index,
+                )
+                for chunk in used_chunks
+            ]
 
-        context = build_context(chunks)
 
         prompt = build_prompt(question, context)
         try:
             response = self.llm.generate(prompt)
+            answers.append(
+                MinimalAnswer(
+                    question_id="single_answer",
+                    question=question,
+                    retrieved_sources=used_sources,
+                    answer=response,
+                )
+            )
+            output = (
+            StudentSearchResultsAndAnswer(
+                search_results=answers,
+                k=k,
+            )
+        )
+
+            save_json(
+                save_path,
+                output.model_dump(),
+            )
+
+            print(
+                f"Saved answers to {save_path}"
+            )
         except Exception as e:
             print(f"[LLM ERROR] {e}")
             response = "Error generating answer"
