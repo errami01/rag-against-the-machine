@@ -18,7 +18,7 @@ class SearchEngine:
     manages a low-latency result cache layer.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, rerank: bool = True) -> None:
         """Initializes the search engine by loading pre-computed indexes and
         models.
 
@@ -35,7 +35,9 @@ class SearchEngine:
             self.cache = SearchCache()
             self.retriever = bm25s.BM25.load("data/processed/bm25/index")
             raw_chunks = load_json("data/processed/chunks/chunks.json")
-            self.reranker = Reranker()
+            self.rerank = rerank
+            if self.rerank:
+                self.reranker = Reranker()
             self.chunks = [
                 Chunk.model_validate(chunk)
                 for chunk in raw_chunks
@@ -81,6 +83,9 @@ class SearchEngine:
             self.chunks[index]
             for index in indices
         ]
+        if not self.rerank:
+            self.cache.set(query, k, candidates)
+            return candidates
         scores = self.reranker.rerank(
             query,
             [chunk.text for chunk in candidates]

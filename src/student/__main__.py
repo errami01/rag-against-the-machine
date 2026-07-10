@@ -55,7 +55,7 @@ class CLI:
             print(e)
             return
 
-    def search(self, query: str, k: int = 5) -> None:
+    def search(self, query: str, k: int = 5, rerank: bool = True) -> None:
         """Execute a query search against the document index and print results.
 
         Fetches the top-K matching text fragments via the retrieval engine
@@ -65,6 +65,7 @@ class CLI:
             query: The text search string.
             k: The maximum number of relevant documents to retrieve.
               Defaults to 1.
+            rerank: Whether to re-rank the results using a neural model.
         """
         try:
             # 1. Define your target folder and file path
@@ -72,8 +73,8 @@ class CLI:
             file_path = output_dir / "single_search_results.json"
             # 2. Automatically create parent directories if missing
             output_dir.mkdir(parents=True, exist_ok=True)
-            engine = SearchEngine()
-            chunks = engine.search(query, k)
+            engine = SearchEngine(rerank=rerank)
+            chunks = engine.search(query, k=k)
             result: MinimalSearchResults = MinimalSearchResults(
                 question_id="single_search",
                 question_str=query,
@@ -109,6 +110,7 @@ class CLI:
         dataset_path: str,
         save_path: str,
         k: int = 10,
+        rerank: bool = True,
     ) -> None:
         """Run batch search loops over an evaluation dataset file.
 
@@ -125,6 +127,7 @@ class CLI:
                 dataset_path=dataset_path,
                 save_path=save_path,
                 k=k,
+                rerank=rerank,
             )
         except Exception as e:
             print(e)

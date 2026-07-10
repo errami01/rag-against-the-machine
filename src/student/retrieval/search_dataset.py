@@ -27,6 +27,7 @@ class DatasetSearcher:
         dataset_path: str,
         save_path: str,
         k: int = 10,
+        rerank: bool = True,
     ) -> None:
         """Executes the batch search pipeline across all questions in the
         dataset.
@@ -47,7 +48,7 @@ class DatasetSearcher:
         """
         dataset = load_dataset(dataset_path)
 
-        engine = SearchEngine()
+        engine = SearchEngine(rerank=rerank)
 
         results: list[MinimalSearchResults] = []
 
