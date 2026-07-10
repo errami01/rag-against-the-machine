@@ -7,6 +7,7 @@ from student.models.chunk import Chunk
 from student.models.dataset import (
     MinimalSource, MinimalAnswer, StudentSearchResultsAndAnswer)
 from student.utils.json import save_json
+import json
 
 
 def build_context(
@@ -34,7 +35,7 @@ def build_context(
     for chunk in chunks:
 
         text = (
-            f"File: {chunk.file_path}\n"
+            f"Chunk ID: {chunk.chunk_id}\n"
             f"{chunk.text}\n"
         )
 
@@ -112,33 +113,40 @@ class AnswerService:
         answers: list[MinimalAnswer] = []
         save_path = "data/output/answers/single_answer.json"
         context, used_chunks = build_context(chunks)
-        used_sources = [
-                MinimalSource(
-                    file_path=chunk.file_path,
-                    first_character_index=chunk.first_character_index,
-                    last_character_index=chunk.last_character_index,
-                )
-                for chunk in used_chunks
-            ]
-
 
         prompt = build_prompt(question, context)
         try:
             response = self.llm.generate(prompt)
+            res = response[
+                response.index("{"): len(response) - response[::-1].index('}')
+                ]
+            res_dict = json.loads(res)
+            used_chunks = [
+                chunk for chunk in used_chunks
+                if chunk.chunk_id == res_dict['source']]
+            used_sources = [
+                    MinimalSource(
+                        file_path=chunk.file_path,
+                        first_character_index=chunk.first_character_index,
+                        last_character_index=chunk.last_character_index,
+                    )
+                    for chunk in used_chunks
+                ]
+
             answers.append(
                 MinimalAnswer(
                     question_id="single_answer",
-                    question=question,
+                    question_str=question,
                     retrieved_sources=used_sources,
-                    answer=response,
+                    answer=res_dict['answer'],
                 )
             )
             output = (
-            StudentSearchResultsAndAnswer(
-                search_results=answers,
-                k=k,
+                StudentSearchResultsAndAnswer(
+                    search_results=answers,
+                    k=k
+                )
             )
-        )
 
             save_json(
                 save_path,

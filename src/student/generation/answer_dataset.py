@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from tqdm import tqdm
@@ -86,6 +87,12 @@ class DatasetAnswerer:
             )
 
             answer = llm.generate(prompt)
+            res = answer[
+                answer.index("{"): len(answer) - answer[::-1].index('}')]
+            res_dict = json.loads(res)
+            used_chunks = [
+                chunk for chunk in used_chunks
+                if chunk.chunk_id == res_dict['source']]
             used_sources = [
                 MinimalSource(
                     file_path=chunk.file_path,
@@ -100,7 +107,7 @@ class DatasetAnswerer:
                     question_id=result.question_id,
                     question=result.question,
                     retrieved_sources=used_sources,
-                    answer=answer,
+                    answer=res_dict['answer'],
                 )
             )
         output = (

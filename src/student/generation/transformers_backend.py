@@ -70,6 +70,11 @@ class TransformersBackend(LLMBackend):
                 "content": (
                     "You are an expert assistant for the vLLM project."
                     "Answer from the context."
+                    "Return the answer in json format."
+                    '{'
+                    '   "answer": "<Detailed Answer>",'
+                    '   "source": "<chunk ID>"'
+                    '}'
                 ),
             },
             {
