@@ -37,7 +37,7 @@ class VLLMBackend(LLMBackend):
     def generate(
         self,
         prompt: str,
-        max_new_tokens: int = 128,
+        max_new_tokens: int = 1000,
     ) -> str:
         """Submits an inference request message sequence and retrieves the
         generated response.
@@ -64,7 +64,13 @@ class VLLMBackend(LLMBackend):
                     "role": "system",
                     "content": (
                         "You are an expert assistant for the vLLM project."
-                        "Answer only using the provided context."
+                        "Answer from the context."
+                        "Answer in json."
+                        "Fill the template below"
+                        '{'
+                        '   "answer": "<Detailed Answer>",'
+                        '   "source_id": ""'
+                        '}'
                     ),
                 },
                 {
@@ -72,7 +78,7 @@ class VLLMBackend(LLMBackend):
                     "content": prompt,
                 },
             ],
-            temperature=0,
+            temperature=None,
             max_tokens=max_new_tokens,
 
             extra_body={

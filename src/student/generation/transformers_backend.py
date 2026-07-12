@@ -45,7 +45,7 @@ class TransformersBackend(LLMBackend):
     def generate(
         self,
         prompt: str,
-        max_new_tokens: int = 300,
+        max_new_tokens: int = 1000,
     ) -> str:
         """Generate a contextual solution from a Hugging Face model template.
 
@@ -70,10 +70,11 @@ class TransformersBackend(LLMBackend):
                 "content": (
                     "You are an expert assistant for the vLLM project."
                     "Answer from the context."
-                    "Return the answer in json format."
+                    "Answer in json."
+                    "Fill the template below"
                     '{'
                     '   "answer": "<Detailed Answer>",'
-                    '   "source": "<chunk ID>"'
+                    '   "source_id": ""'
                     '}'
                 ),
             },
