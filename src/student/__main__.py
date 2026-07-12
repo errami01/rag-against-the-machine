@@ -185,6 +185,7 @@ class CLI:
             DatasetAnswerer().run(
                 search_results_path,
                 save_path,
+                backend
             )
         except Exception as e:
             print(f"Answer dataset Error: {e}")
