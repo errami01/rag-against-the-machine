@@ -35,7 +35,7 @@ def build_context(
     for chunk in chunks:
 
         text = (
-            f"Chunk ID: {chunk.chunk_id}\n"
+            f"Source ID: {chunk.chunk_id}\n"
             f"{chunk.text}\n"
         )
 
@@ -117,13 +117,19 @@ class AnswerService:
         prompt = build_prompt(question, context)
         try:
             response = self.llm.generate(prompt)
+        except Exception as e:
+            raise Exception(f"LLM ERROR: {e}")
+        try:
             res = response[
                 response.index("{"): len(response) - response[::-1].index('}')
                 ]
             res_dict = json.loads(res)
+        except Exception:
+            res_dict = {"answer": "No answer", "source_id": "No answer"}
+        try:
             used_chunks = [
                 chunk for chunk in used_chunks
-                if chunk.chunk_id == res_dict['source']]
+                if chunk.chunk_id == res_dict.get('source_id')]
             used_sources = [
                     MinimalSource(
                         file_path=chunk.file_path,
