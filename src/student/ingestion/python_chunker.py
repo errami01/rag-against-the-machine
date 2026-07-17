@@ -3,6 +3,7 @@ import hashlib
 from pathlib import Path
 
 from student.models import Chunk
+from student.utils.project_root import get_project_root
 
 
 class PythonChunker:
@@ -48,7 +49,7 @@ class PythonChunker:
             source snippets.
         """
         text = path.read_text(encoding="utf-8", errors="ignore")
-
+        path = path.relative_to(f"{get_project_root()}")
         try:
             tree = ast.parse(text)
         except SyntaxError:

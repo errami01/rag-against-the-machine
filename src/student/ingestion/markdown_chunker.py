@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from student.models import Chunk
-
+from student.utils.project_root import get_project_root
 
 HEADER_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 PARAGRAPH_PATTERN = re.compile(r"\n\s*\n")
@@ -70,7 +70,7 @@ class MarkdownChunker:
             A list of structural Chunk objects containing context text.
         """
         matches = list(HEADER_PATTERN.finditer(text))
-
+        path = path.relative_to(f"{get_project_root()}")
         if not matches:
             return self._split_section(
                 path,

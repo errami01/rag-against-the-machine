@@ -2,7 +2,7 @@ from pathlib import Path
 
 from student.models.dataset import RagDataset
 from student.utils.json import load_json
-
+from student.utils.project_root import get_project_root
 
 def load_dataset(path: str | Path) -> RagDataset:
     """Loads and validates an evaluation dataset from a JSON file.

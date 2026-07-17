@@ -108,9 +108,9 @@ class CLI:
     def search_dataset(
         self,
         dataset_path: str,
-        save_path: str,
+        save_directory: str,
         k: int = 10,
-        rerank: bool = True,
+        rerank: bool = False,
     ) -> None:
         """Run batch search loops over an evaluation dataset file.
 
@@ -125,7 +125,7 @@ class CLI:
         try:
             DatasetSearcher().run(
                 dataset_path=dataset_path,
-                save_path=save_path,
+                save_path=save_directory,
                 k=k,
                 rerank=rerank,
             )

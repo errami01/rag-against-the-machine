@@ -5,7 +5,7 @@ from student.utils.json import load_json
 from student.retrieval.cache import SearchCache
 # from flashrank import Ranker, RerankRequest
 from student.retrieval.reranker import Reranker
-
+from student.utils.project_root import get_project_root
 
 class SearchEngine:
     """A hybrid RAG search pipeline combining lexical retrieval and neural
@@ -33,7 +33,8 @@ class SearchEngine:
         """
         try:
             self.cache = SearchCache()
-            self.retriever = bm25s.BM25.load("data/processed/bm25/index")
+            idexer_path = get_project_root() / "data/processed/bm25/index"
+            self.retriever = bm25s.BM25.load(idexer_path)
             raw_chunks = load_json("data/processed/chunks/chunks.json")
             self.rerank = rerank
             if self.rerank:

@@ -6,6 +6,7 @@ from student.ingestion.chunker import Chunker
 from student.ingestion.loader import discover_files
 from student.utils.json import save_json
 from student.retrieval.bm25_index import BM25Indexer
+from student.utils.project_root import get_project_root
 
 
 class Indexer:
@@ -71,7 +72,7 @@ class Indexer:
 
         BM25Indexer().build(
             chunks,
-            "data/processed/bm25/index",
+            get_project_root() / "data/processed/bm25/index",
         )
 
         print(
