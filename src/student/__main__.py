@@ -49,6 +49,9 @@ class CLI:
         Args:
             max_chunk_size: The character limit constraint for each text chunk.
         """
+        if max_chunk_size <= 0:
+            print("Error: max_chunk_size must be a positive integer.")
+            return
         try:
             Indexer().index(max_chunk_size)
         except Exception as e:
@@ -67,6 +70,12 @@ class CLI:
               Defaults to 1.
             rerank: Whether to re-rank the results using a neural model.
         """
+        if k <= 0:
+            print("Error: k must be a positive integer.")
+            return
+        if not query.strip():
+            print("Error: query string cannot be empty.")
+            return
         try:
             # 1. Define your target folder and file path
             output_dir = Path("data/output/single_search_results")
@@ -122,6 +131,9 @@ class CLI:
             save_path: The destination path where search matrices are written.
             k: Retrieval ceiling allocated per query instance. Defaults to 10.
         """
+        if k <= 0:
+            print("Error: k must be a positive integer.")
+            return
         try:
             DatasetSearcher().run(
                 dataset_path=dataset_path,
@@ -157,6 +169,12 @@ class CLI:
             backend: The active inference infrastructure tag. Defaults to
               "transformers".
         """
+        if k <= 0:
+            print("Error: k must be a positive integer.")
+            return
+        if not question.strip():
+            print("Error: question string cannot be empty.")
+            return
         try:
             response = AnswerService(backend=backend).answer(question, k=k)
         except Exception as e:
@@ -206,6 +224,9 @@ class CLI:
             dataset_path: The path to the gold-standard reference dataset.
             k: The top-K retrieval context validation limit. Defaults to 10.
         """
+        if k <= 0:
+            print("Error: k must be a positive integer.")
+            return
         try:
             Evaluator().evaluate(
                 student_answer_path,
