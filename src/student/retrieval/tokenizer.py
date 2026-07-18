@@ -8,7 +8,14 @@ TOKEN_PATTERN = re.compile(r"\w+")
 CAMEL_SPLIT_PATTERN = re.compile(
     r'(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])'
     )
-
+DEFAULT_STOP_WORDS = {
+    "the", "a", "an", "and", "or", "but", "is", "are", "was", "were", "be", 
+    "been", "being", "in", "on", "at", "to", "from", "by", "for", "with", 
+    "about", "against", "between", "into", "through", "during", "before", 
+    "after", "above", "below", "of", "it", "its", "they", "them", "their", 
+    "this", "that", "these", "those", "which", "who", "whom", "what", "as", 
+    "if", "when", "where", "how", "why", "can", "will", "should", "would", "you"
+}
 
 @lru_cache(maxsize=2048)
 def tokenize(text: str, dataset_name: str = "docs") -> tuple[str, ...]:
@@ -32,6 +39,7 @@ def tokenize(text: str, dataset_name: str = "docs") -> tuple[str, ...]:
         return tuple(
             token.lower()
             for token in TOKEN_PATTERN.findall(text)
+            if token not in DEFAULT_STOP_WORDS
         )
     tokens = []
 
@@ -40,7 +48,8 @@ def tokenize(text: str, dataset_name: str = "docs") -> tuple[str, ...]:
     # if file_type == "python":
     for token in raw_tokens:
         lower_token = token.lower()
-        tokens.append(lower_token)
+        if lower_token not in DEFAULT_STOP_WORDS:
+            tokens.append(lower_token)
 
         # 2. If it contains underscores (snake_case), split it up
         # if "_" in token:
@@ -51,7 +60,7 @@ def tokenize(text: str, dataset_name: str = "docs") -> tuple[str, ...]:
         # 3. If it uses CamelCase, split it up
         camel_parts = CAMEL_SPLIT_PATTERN.split(token)
         if len(camel_parts) > 1:
-            tokens.extend(p.lower() for p in camel_parts if p)
+            tokens.extend(p.lower() for p in camel_parts if p not in DEFAULT_STOP_WORDS)
 
     # Returning a tuple ensures it remains hashable for lru_cache
     return tuple(tokens)
