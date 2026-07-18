@@ -49,7 +49,7 @@ class SearchEngine:
                 "Please run the indexer before using the search engine."
             )
 
-    def search(self, query: str, k: int = 5) -> list[Chunk]:
+    def search(self, query: str, k: int = 5, dataset_name: str = "docs") -> list[Chunk]:
         """Execute a complete retrieval-and-rerank sequence for a query.
 
         Checks the internal cache first. If a cache miss occurs, tokenizes
@@ -71,7 +71,7 @@ class SearchEngine:
         if cached_result is not None:
             return cached_result
 
-        query_tokens = list(tokenize(query))
+        query_tokens = list(tokenize(query, dataset_name))
         results, scores = (
             self.retriever.retrieve(
                 [query_tokens],

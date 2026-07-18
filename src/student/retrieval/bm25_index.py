@@ -36,10 +36,21 @@ class BM25Indexer:
             OSError: If creating the output directory directory or writing the
               index binaries to disk fails.
         """
-        corpus = [
-            tokenize(chunk.text)
-            for chunk in chunks
-        ]
+        # corpus = [
+        #     tokenize(chunk.text, dataset_name="code")
+        #     for chunk in chunks
+        # ]
+        # corpus.extend([
+        #     tokenize(chunk.text, dataset_name="docs")
+        #     for chunk in chunks
+        # ])
+        corpus = []
+        for chunk in chunks:
+            if chunk.file_path.endswith(".py"):
+                tokens = tokenize(chunk.text, dataset_name="code")
+            else:
+                tokens = tokenize(chunk.text, dataset_name="docs")
+            corpus.append(tokens)
 
         retriever = bm25s.BM25()
 

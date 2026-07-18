@@ -11,7 +11,7 @@ CAMEL_SPLIT_PATTERN = re.compile(
 
 
 @lru_cache(maxsize=2048)
-def tokenize(text: str) -> tuple[str, ...]:
+def tokenize(text: str, dataset_name: str = "docs") -> tuple[str, ...]:
     """Tokenizes a string into normalized, code-aware textual sub-components.
 
     Extracts alphanumeric text blocks and applies language-specific parsing
@@ -27,6 +27,12 @@ def tokenize(text: str) -> tuple[str, ...]:
         format guarantees that the function output can be safely cached by
         lru_cache.
     """
+    if "docs" in dataset_name.lower():
+        # For general documentation, we can use a simpler tokenization
+        return tuple(
+            token.lower()
+            for token in TOKEN_PATTERN.findall(text)
+        )
     tokens = []
 
     # 1. Find all standard alphanumeric blocks
@@ -37,10 +43,10 @@ def tokenize(text: str) -> tuple[str, ...]:
         tokens.append(lower_token)
 
         # 2. If it contains underscores (snake_case), split it up
-        if "_" in token:
-            sub_tokens = lower_token.split("_")
-            # Only add meaningful sub-words
-            tokens.extend(t for t in sub_tokens if t)
+        # if "_" in token:
+        #     sub_tokens = lower_token.split("_")
+        #     # Only add meaningful sub-words
+        #     tokens.extend(t for t in sub_tokens if t)
 
         # 3. If it uses CamelCase, split it up
         camel_parts = CAMEL_SPLIT_PATTERN.split(token)
@@ -53,7 +59,7 @@ def tokenize(text: str) -> tuple[str, ...]:
 
 # TOKEN_PATTERN = re.compile(r"\w+")
 # @lru_cache(maxsize=2048)
-# def tokenize(
+# def tokenize_prompt(
 #     text: str,
 # ) -> tuple[str, ...]:
 

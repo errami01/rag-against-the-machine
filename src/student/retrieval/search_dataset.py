@@ -51,10 +51,10 @@ class DatasetSearcher:
         engine = SearchEngine(rerank=rerank)
 
         results: list[MinimalSearchResults] = []
-
+        dataset_name = Path(dataset_path).stem
         for question in tqdm(dataset.rag_questions, desc="Searching"):
 
-            chunks = engine.search(question.question, k=k)
+            chunks = engine.search(question.question, k=k, dataset_name=dataset_name)
 
             sources = [
                 MinimalSource(
