@@ -7,6 +7,7 @@ from student.retrieval.cache import SearchCache
 from student.retrieval.reranker import Reranker
 from student.utils.project_root import get_project_root
 
+
 class SearchEngine:
     """A hybrid RAG search pipeline combining lexical retrieval and neural
     reranking.
@@ -49,7 +50,9 @@ class SearchEngine:
                 "Please run the indexer before using the search engine."
             )
 
-    def search(self, query: str, k: int = 5, dataset_name: str = "docs") -> list[Chunk]:
+    def search(
+            self, query: str, k: int = 5, dataset_name: str = "docs"
+            ) -> list[Chunk]:
         """Execute a complete retrieval-and-rerank sequence for a query.
 
         Checks the internal cache first. If a cache miss occurs, tokenizes

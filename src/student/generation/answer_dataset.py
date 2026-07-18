@@ -92,7 +92,8 @@ class DatasetAnswerer:
                 raise Exception(f"LLM ERROR: {e}")
             try:
                 res = response[
-                    response.index("{"): len(response) - response[::-1].index('}')
+                    response.index("{"): len(response) - response[::-1].index(
+                        '}')
                     ]
                 res_dict = json.loads(res)
             except Exception:

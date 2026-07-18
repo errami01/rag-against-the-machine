@@ -16,7 +16,7 @@ class BM25Indexer:
     def build(
         self,
         chunks: list[Chunk],
-        output_dir: str,
+        output_dir: str | Path,
     ) -> None:
         """Constructs a BM25 index from text chunks and saves it to a
           directory.
