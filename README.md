@@ -514,7 +514,41 @@ Search latency is typically well below one second.
 Most execution time is spent during LLM generation.
 
 ---
+# Caching
+## Persistent cache
+To avoid repeating expensive preprocessing steps, the project caches all generated artifacts after indexing.
 
+During the first indexing run, the repository is:
+
+parsed and chunked,
+tokenized,
+indexed with BM25.
+
+The generated artifacts are stored under data/processed/ and reused by subsequent commands. As long as the source repository remains unchanged, indexing does not need to be performed again.
+
+Example:
+```
+data/
+├── raw/
+│   └── vllm-0.10.1/
+└── processed/
+    ├── chunks/
+    │   └── chunks.json
+    └── bm25/
+        └── index/
+```
+## In-memory tokenizer cache
+The tokenizer uses Python's ```functools.lru_cache``` decorator to memoize tokenization results.
+
+Because many chunks contain repeated identifiers, metadata, or overlapping content (for example, class and method chunks), identical text may be tokenized multiple times during indexing. The LRU cache stores previously computed token sequences, eliminating redundant tokenization and reducing CPU overhead.
+```Python
+from functools import lru_cache
+
+@lru_cache(maxsize=...)
+def tokenize(text: str) -> tuple[str, ...]:
+    ...
+```
+The cache is memory-resident and automatically cleared when the application exits.
 # Design Decisions
 
 The system intentionally separates retrieval from generation.
